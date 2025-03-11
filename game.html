@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哥哥的測試</title>
+  <style>
+    body {
+      background-color: #ffd6e9;
+      color: #a30052;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 50px;
+      position: relative;
+      transition: background-color 1s, color 1s;
+      overflow: hidden;
+    }
+    /* 老电视扫描线效果 */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.05),
+        rgba(0,0,0,0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      animation: tvFlicker 1s infinite;
+      z-index: 5;
+    }
+    @keyframes tvFlicker {
+      0% { opacity: 0.7; }
+      50% { opacity: 0.9; }
+      100% { opacity: 0.7; }
+    }
+    /* 屏幕闪烁覆盖层 */
+    #flashOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: url('https://as2.ftcdn.net/v2/jpg/01/38/06/91/1000_F_138069152_qLMqnGyO8FIFlYySSz7btd9foo5aZrSG.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      z-index: 30;
+      transition: opacity 0.1s;
+    }
+    .container {
+      background: rgba(255,255,255,0.7);
+      padding: 20px;
+      border-radius: 15px;
+      display: inline-block;
+      position: relative;
+      z-index: 10;
+      transition: background 1s;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    button {
+      background-color: #ff80bf;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background-color: #e60073;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    /* 正常弹幕效果 */
+    .floating-text {
+      position: absolute;
+      font-size: 2em;
+      font-family: 'Courier New', monospace;
+      color: #8b0000;
+      font-weight: bold;
+      text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000;
+      pointer-events: none;
+      z-index: 1000;
+      animation: flashFade 3s forwards, flashColor 0.5s infinite alternate;
+    }
+    @keyframes flashFade {
+      0% { opacity: 1; }
+      10% { opacity: 0.6; }
+      20% { opacity: 1; }
+      30% { opacity: 0.6; }
+      40% { opacity: 1; }
+      50% { opacity: 0.6; }
+      60% { opacity: 0.4; }
+      70% { opacity: 0.3; }
+      80% { opacity: 0.2; }
+      90% { opacity: 0.1; }
+      100% { opacity: 0; }
+    }
+    @keyframes flashColor {
+      0% { color: #8b0000; text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000; }
+      50% { color: #ff1493; text-shadow: 0 0 10px #ff69b4, 0 0 15px #ff69b4, 0 0 20px #ff69b4; }
+      100% { color: #8b0000; text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000; }
+    }
+    /* 特殊弹幕效果：从屏幕左边飘向右边 */
+    .special-floating-text {
+      position: absolute;
+      font-size: 2em;
+      font-family: 'Courier New', monospace;
+      color: #550000;
+      font-weight: bold;
+      text-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000;
+      pointer-events: none;
+      z-index: 1000;
+      left: 0;
+      animation: slowFly 13s linear infinite;
+    }
+    @keyframes slowFly {
+      0% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100vw); opacity: 0.5; }
+    }
+    /* 特殊正确按钮样式 */
+    .special-button {
+      position: absolute;
+      transform: scale(3);
+      z-index: 25;
+      cursor: pointer;
+    }
+    /* 結局畫面樣式 */
+    .ending-container {
+      background: #330000;
+      color: #ff9999;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <h1 id="question">妹妹，你喜歡哥哥嗎？</h1>
+    <div id="options"></div>
+    <p class="message" id="message"></p>
+  </div>
+  <!-- 屏幕闪烁覆盖层 -->
+  <div id="flashOverlay"></div>
+  <script>
+    // 题目数组，共10题
+    let questions = [
+      { 
+        q: "妹妹，你喜歡哥哥嗎？", 
+        options: ["喜歡", "不喜歡"], 
+        correct: "喜歡", 
+        response: "呵呵，我就知道……妹妹怎麼可能不喜歡哥哥呢？", 
+        wrong: [
+          "不對哦，妹妹……你是不是想讓哥哥生氣？", 
+          "這個回答……可不行啊，妹妹。", 
+          "妹妹，你再說一次？再說一次看看？"
+        ] 
+      },
+      { 
+        q: "如果哥哥不讓你離開，你會怎麼做？", 
+        options: ["聽哥哥的", "反抗"], 
+        correct: "聽哥哥的", 
+        response: "嗯，這才乖……妹妹只能待在哥哥身邊，哪兒也不能去。", 
+        wrong: [
+          "妹妹……你是不是不懂規矩？", 
+          "哈……反抗？你覺得你能逃掉嗎？", 
+          "這可不像是你該說的話呢，妹妹。"
+        ] 
+      },
+      { 
+        q: "你會對別的男人笑嗎？", 
+        options: ["不會", "會啊"], 
+        correct: "不會", 
+        response: "很好，妹妹的笑容只屬於哥哥一個人。", 
+        wrong: [
+          "妹妹……你說什麼？", 
+          "是谁？我把他杀了……", 
+          "這句話……我不想再聽到第二次。"
+        ] 
+      },
+      { 
+        q: "如果哥哥生氣了，你會怎麼辦？", 
+        options: ["安撫哥哥", "不理他"], 
+        correct: "安撫哥哥", 
+        response: "妹妹真懂事……別讓哥哥生氣，不然會有懲罰哦。", 
+        wrong: [
+          "妹妹，你這態度讓哥哥更火了！", 
+          "不理？你打算怎麼彌補？", 
+          "這回答可真讓哥哥失望。"
+        ] 
+      },
+      { 
+        q: "你願意一直陪著哥哥嗎？", 
+        options: ["願意", "不願意"], 
+        correct: "願意", 
+        response: "果然，妹妹是屬於我的，永遠都不許離開。", 
+        wrong: [
+          "妹妹...不要让哥哥难过", 
+          "這个回答哥哥不接受。", 
+          "不願意？话可不能乱说。"
+        ] 
+      },
+      { 
+        q: "如果有人想帶走你，你會怎麼做？", 
+        options: ["拒絕", "跟他走"], 
+        correct: "拒絕", 
+        response: "這才對，妹妹的歸屬是我，別人休想碰你。", 
+        wrong: [
+          "妹妹，你怎麼能這麼輕易离开哥哥？", 
+          "跟他走？你知道那意味著什麼嗎？", 
+          "這回答，讓哥哥很生氣。"
+        ] 
+      },
+      { 
+        q: "你會對哥哥撒謊嗎？", 
+        options: ["不會", "會"], 
+        correct: "不會", 
+        response: "妹妹要誠實，不然哥哥會很傷心的哦……", 
+        wrong: [
+          "撒謊？那麼多秘密哥哥怎能容忍？", 
+          "不可以对哥哥撒谎。", 
+          "這回答讓哥哥很失望。"
+        ] 
+      },
+      { 
+        q: "你覺得哥哥會放開你嗎？", 
+        options: ["不會", "會"], 
+        correct: "不會", 
+        response: "呵呵，放開你？妹妹怎麼會有這種錯覺呢？", 
+        wrong: [
+          "這回答讓哥哥懷疑你的心。", 
+          "放開？你敢這麼說？", 
+          "妹妹，你的回答讓我很難過。"
+        ] 
+      },
+      { 
+        q: "你願意屬於哥哥一個人嗎？", 
+        options: ["願意", "不願意"], 
+        correct: "願意", 
+        response: "妹妹是哥哥的，這個事實永遠不會改變。", 
+        wrong: [
+          "不屬於我？這回答太刺耳了！", 
+          "妹妹，你這回答讓我很生氣。", 
+          "你確定嗎？這回答可不能讓哥哥安心。"
+        ] 
+      },
+      { 
+        q: "妹妹，我們永遠都會在一起，對吧？", 
+        options: ["對", "不對"], 
+        correct: "對", 
+        response: "呵呵……妹妹，從一開始，你就已經逃不掉了哦……", 
+        wrong: [
+          "不對？你敢反駁我？", 
+          "妹妹，這回答太讓哥哥失望了。", 
+          "你要知道，逃脫是沒有出路的。"
+        ] 
+      }
+    ];
+    
+    // 為每道題設定特殊彈幕內容映射（答錯 4 次時觸發）
+    const specialMessagesMapping = {
+      0: [
+        "為什麼你要選『不喜歡』？",
+        "妹妹，你到底在想什麼？",
+        "你難道不懂我的心意嗎？",
+        "錯了！我就知道你肯定喜歡我！",
+        "再錯下去，誰來愛你？"
+      ],
+      1: [
+        "為什麼不聽我的？",
+        "你是不是想離開我？",
+        "錯誤讓我很失望！",
+        "妹妹，留在我身邊好不好？",
+        "反抗？你知道那有多可笑嗎？"
+      ],
+      2: [
+        "你的笑容只屬於我！",
+        "怎麼能對別人笑？",
+        "錯誤的笑容讓我心碎！",
+        "妹妹，你在對誰笑？",
+        "你只能對我笑！"
+      ],
+      3: [
+        "你知道不安撫我意味著什麼嗎？",
+        "錯了！你應該安撫我！",
+        "不要讓我更加生氣！",
+        "錯誤讓我火大！",
+        "妹妹，再錯一次，後果自負！"
+      ],
+      4: [
+        "怎麼可能不陪著我？",
+        "錯了，你知道我的心意嗎？",
+        "你的拒絕讓我難以置信！",
+        "再錯下去，你就要離我而去了！",
+        "妹妹，永遠不許離開！"
+      ],
+      5: [
+        "你怎麼能跟別人走？",
+        "你的歸屬只能是我！",
+        "錯誤讓我憤怒！",
+        "拒絕，這才是正確的選擇！",
+        "你知道別人永遠不能擁有你！"
+      ],
+      6: [
+        "誠實才是最好的，為什麼撒謊？",
+        "錯誤讓我心碎！",
+        "你怎麼能欺騙我？",
+        "妹妹，誠實是我的唯一要求！",
+        "不要再撒謊了！"
+      ],
+      7: [
+        "放開？你難道不知道你是我的嗎？",
+        "錯了，再說放開，我就讓你知道什麼是我的！",
+        "你敢這麼想？",
+        "你的錯誤讓我很失望！",
+        "妹妹，永遠不許放開！"
+      ],
+      8: [
+        "怎麼能不屬於我？",
+        "錯誤讓我憤怒！",
+        "你的拒絕只能讓我更愛你！",
+        "再錯一次，你就不屬於我了！",
+        "妹妹，永遠只屬於我！"
+      ],
+      9: [
+        "怎麼能說不呢？",
+        "錯了，再說不，我就讓你後悔！",
+        "妹妹，你知道我們的約定嗎？",
+        "再錯下去，你就逃不掉了！",
+        "你難道不願意永遠在我身邊？"
+      ]
+    };
+    
+    let index = 0;
+    let wrongCount = 0;
+    let specialEventActive = false;
+    let specialBarrageInterval; // 用于生成特殊彈幕的 interval
+    
+    // 清除所有特殊元素
+    function removeSpecialElements() {
+      document.querySelectorAll(".special-button").forEach(el => el.remove());
+      document.querySelectorAll(".special-floating-text").forEach(el => el.remove());
+      if (specialBarrageInterval) {
+        clearInterval(specialBarrageInterval);
+        specialBarrageInterval = null;
+      }
+    }
+    
+    function loadQuestion() {
+      if (index >= questions.length) return; // 避免超出范围
+      wrongCount = 0;
+      specialEventActive = false;
+      removeSpecialElements();
+      
+      let questionText = document.getElementById("question");
+      let optionsDiv = document.getElementById("options");
+      let message = document.getElementById("message");
+      
+      questionText.innerText = questions[index].q;
+      optionsDiv.innerHTML = "";
+      message.innerText = "";
+      
+      questions[index].options.forEach(option => {
+        let button = document.createElement("button");
+        button.innerText = option;
+        button.onclick = () => checkAnswer(option);
+        optionsDiv.appendChild(button);
+      });
+    }
+    
+    function checkAnswer(answer) {
+      if (index >= questions.length) return;
+      let correct = questions[index].correct;
+      let message = document.getElementById("message");
+      
+      if (answer === correct) {
+        if (specialEventActive) {
+          removeSpecialElements();
+        }
+        message.innerText = questions[index].response;
+        let optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = "";
+        let nextButton = document.createElement("button");
+        nextButton.innerText = "下一題";
+        nextButton.onclick = nextQuestion;
+        optionsDiv.appendChild(nextButton);
+      } else {
+        wrongCount++;
+        if (wrongCount < 4) {
+          let wrongResponses = questions[index].wrong;
+          let randomIndex = Math.floor(Math.random() * wrongResponses.length);
+          createFloatingText(wrongResponses[randomIndex]);
+        } else {
+          if (!specialEventActive) {
+            triggerSpecialEvent();
+          }
+        }
+      }
+    }
+    
+    function triggerSpecialEvent() {
+      specialEventActive = true;
+      let optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      
+      // 生成 20 个特殊正确答案按钮，散布在屏幕上
+      for (let i = 0; i < 20; i++) {
+        let btn = document.createElement("button");
+        btn.innerText = questions[index].correct;
+        btn.classList.add("special-button");
+        btn.style.left = Math.random() * 90 + "vw";
+        btn.style.top = Math.random() * 90 + "vh";
+        btn.onclick = () => {
+          removeSpecialElements();
+          nextQuestion();
+        };
+        document.body.appendChild(btn);
+      }
+      
+      // 使用当前题目的特殊弹幕内容（从 specialMessagesMapping 中取）
+      let specialMessages = specialMessagesMapping[index] || [
+        "哥哥：為什麼選錯了？",
+        "哥哥：錯誤讓我生氣！",
+        "哥哥：再錯下去就沒救了！"
+      ];
+      let spawnedCount = 0;
+      specialBarrageInterval = setInterval(() => {
+        if (spawnedCount >= 400) {
+          clearInterval(specialBarrageInterval);
+          specialBarrageInterval = null;
+          return;
+        }
+        spawnedCount++;
+        let div = document.createElement("div");
+        div.classList.add("special-floating-text");
+        // 固定起始位置：屏幕左边
+        div.style.left = "0vw";
+        // 随机垂直位置
+        div.style.top = Math.random() * 100 + "vh";
+        let msg = specialMessages[Math.floor(Math.random() * specialMessages.length)];
+        div.innerText = msg;
+        document.body.appendChild(div);
+      }, 300);
+    }
+    
+    function createFloatingText(text) {
+      let floatingText = document.createElement("div");
+      floatingText.classList.add("floating-text");
+      floatingText.innerText = text;
+      floatingText.style.top = Math.random() * 80 + "vh";
+      floatingText.style.left = Math.random() * 80 + "vw";
+      document.body.appendChild(floatingText);
+      setTimeout(() => { floatingText.remove(); }, 3000);
+    }
+    
+    function nextQuestion() {
+      index++;
+      if (index < questions.length) {
+        loadQuestion();
+      } else {
+        showEnding();
+      }
+    }
+    
+    function showEnding() {
+      document.body.style.backgroundColor = "#330000";
+      document.body.style.color = "#ff9999";
+      removeSpecialElements();
+      let container = document.getElementById("container");
+      container.className = "ending-container";
+      container.innerHTML = "<h1>結局</h1>" +
+        "<p>呵呵……妹妹，你終於通過了哥哥的考驗。<br>" +
+        "從今以後，無論你走到哪裡，你都屬於我。<br>" +
+        "哥哥會一直保護你，也會監視你，因為這是我們永遠不變的約定！</p>" +
+        "<p>別忘了，這條路一旦走上，便無法回頭……</p>";
+    }
+    
+    loadQuestion();
+    
+    // 每12秒触发一次闪烁效果，持续0.2秒
+    setInterval(() => {
+      let flashOverlay = document.getElementById("flashOverlay");
+      flashOverlay.style.opacity = "1";
+      setTimeout(() => {
+        flashOverlay.style.opacity = "0";
+      }, 200);
+    }, 12000);
+  </script>
+</body>
+</html>
