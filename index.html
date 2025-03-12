@@ -200,7 +200,7 @@
     <div id="options"></div>
     <p class="message" id="message"></p>
   </div>
-  <!-- 结束游戏按钮容器（置于容器下方外侧） -->
+  <!-- 结束游戏按钮容器 -->
   <div class="end-game-btn-container">
     <button id="endGameButton">结束游戏</button>
   </div>
@@ -211,28 +211,28 @@
   <!-- 模态框：结束游戏流程 -->
   <div id="endGameModal1" class="modal">
     <div class="modal-content">
-      <p>是否真的要结束游戏？</p>
+      <p>真的要放弃我们之间的故事吗？</p>
       <button id="modal1No">不是</button>
       <button id="modal1Yes">是</button>
     </div>
   </div>
   <div id="endGameModal2" class="modal">
     <div class="modal-content">
-      <p>妹妹，真的要结束游戏吗？</p>
-      <button id="modal2Sorry">对不起哥哥我按错了</button>
+      <p>妹妹，妳真的要结束这段约定吗？</p>
+      <button id="modal2Sorry">对不起，我按错了</button>
       <button id="modal2End">结束游戏</button>
     </div>
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>妹妹，你就继续玩下去吧，不然……你知道的……</p>
-      <button id="modal3Love">哥哥我爱你</button>
-      <button id="modal3Release">哥哥放我走</button>
+      <p>妹妹，妳就留在我身边吧，不然…妳知道后果。</p>
+      <button id="modal3Love">哥哥我爱妳</button>
+      <button id="modal3Release">哥哥放妳走</button>
     </div>
   </div>
   
   <script>
-    // 题目数组，共6题（删除了第4、6、7、8题）
+    // 题目数组，共6题（删除了原第4、6、7、8题）
     let questions = [
       {
         q: "妹妹，你喜歡哥哥嗎？",
@@ -240,20 +240,20 @@
         correct: "喜歡",
         response: "呵呵，我就知道……妹妹怎麼可能不喜歡哥哥呢？",
         wrong: [
-          "不對哦，妹妹……你是不是想讓哥哥生氣？",
-          "這個回答……可不行啊，妹妹。",
-          "妹妹，你再說一次？再說一次看看？"
+          "為什麼選『不喜歡』？ 妳知道我有多在乎妳嗎？",
+          "妹妹，妳的選擇讓我好失望……",
+          "妳難道不知道，只有我才值得妳的全心全意？"
         ]
       },
       {
         q: "如果哥哥不讓你離開，你會怎麼做？",
         options: ["聽哥哥的", "反抗"],
         correct: "聽哥哥的",
-        response: "嗯，這才乖……妹妹只能待在哥哥身邊，哪兒也不能去。",
+        response: "嗯，這才乖……妹妹只能待在我身邊，哪兒也不能去。",
         wrong: [
-          "妹妹……你是不是不懂規矩？",
-          "哈……反抗？你覺得你能逃掉嗎？",
-          "這可不像是你該說的話呢，妹妹。"
+          "為什麼不聽我的？ 妳就應該服從我。",
+          "妳是不是想逃離我？ 真讓我心寒。",
+          "這個回答讓我失望透頂……"
         ]
       },
       {
@@ -262,9 +262,9 @@
         correct: "不會",
         response: "很好，妹妹的笑容只屬於哥哥一個人。",
         wrong: [
-          "妹妹……你說什麼？",
-          "是谁？我把他杀了……",
-          "這句話……我不想再聽到第二次。"
+          "妳的笑容，應該只屬於哥哥。",
+          "怎麼能讓其他人看到妳的笑容？",
+          "這样真是讓哥哥心碎。"
         ]
       },
       {
@@ -273,9 +273,9 @@
         correct: "願意",
         response: "果然，妹妹是屬於我的，永遠都不許離開。",
         wrong: [
-          "妹妹...不要让哥哥难过",
-          "這个回答哥哥不接受。",
-          "不願意？话可不能乱说。"
+          "妳怎麼能不陪在我身邊？",
+          "妳不知道我對妳的心有多深嗎？",
+          "妳的拒絕讓我無法接受……"
         ]
       },
       {
@@ -284,74 +284,74 @@
         correct: "願意",
         response: "妹妹是哥哥的，這個事實永遠不會改變。",
         wrong: [
-          "不屬於我？這回答太刺耳了！",
-          "妹妹，你這回答讓我很生氣。",
-          "你確定嗎？這回答可不能讓哥哥安心。"
+          "妳怎麼能不屬於我？",
+          "你怎么可以不爱我",
+          "拒绝了哥哥更加不会放开你"
         ]
       },
       {
         q: "妹妹，我們永遠都會在一起，對吧？",
         options: ["對", "不對"],
         correct: "對",
-        response: "呵呵……妹妹，從一開始，你就已經逃不掉了哦……",
+        response: "呵呵……妹妹，從一開始，妳就無法逃離我了……",
         wrong: [
-          "不對？你敢反驳我？",
-          "妹妹，這回答太讓哥哥失望了。",
-          "你要知道，逃脫是沒有出路的。"
+          "妳怎麼能說不？",
+          "錯了，若妳再反駁，我保證讓妳後悔！",
+          "妹妹，妳難道忘了我們的約定？"
         ]
       }
     ];
     
-    // 重新映射特殊弹幕内容，新编号 0~5 分别对应原映射的 0,1,2,4,8,9
+    // 重新映射特殊弹幕内容，新编号 0~5 分别对应上述题目
     const specialMessagesMapping = {
       0: [
-        "為什麼你要選『不喜歡』？",
-        "妹妹，你到底在想什麼？",
-        "你難道不懂我的心意嗎？",
-        "錯了！我就知道你肯定喜歡我！",
-        "再錯下去，誰來愛你？"
+        "為什麼選『不喜歡』？ 妳知道我有多在乎妳嗎？",
+        "妹妹，妳的選擇讓我好失望……",
+        "妳難道不懂，只有我才值得妳全心全意？",
+        "錯了，我早就看出妳心中只有我！",
+        "再錯下去，妳就會失去我！"
       ],
       1: [
-        "為什麼不聽我的？",
-        "你是不是想離開我？",
-        "錯誤讓我很失望！",
-        "妹妹，留在我身邊好不好？",
-        "反抗？你知道那有多可笑嗎？"
+        "為什麼不聽我的？ 妳就應該服從我。",
+        "妳是不是想逃離我？ 真讓我心寒。",
+        "這個回答讓我失望透頂……",
+        "妹妹，妳只應該留在我身邊。",
+        "反抗？妳真讓我覺得可笑。"
       ],
       2: [
-        "你的笑容只屬於我！",
-        "怎麼能對別人笑？",
-        "錯誤的笑容讓我心碎！",
-        "妹妹，你在對誰笑？",
-        "你只能對我笑！"
+        "妳的笑容，應該只屬於我。",
+        "怎麼能讓其他人看到妳的笑容？",
+        "這樣的笑容只會讓我心碎。",
+        "妹妹，妳在對誰笑？",
+        "妳只應該笑給我看！"
       ],
       3: [
-        "怎麼可能不陪著我？",
-        "錯了，你知道我的心意嗎？",
-        "你的拒絕讓我難以置信！",
-        "再錯下去，你就要離我而去了！",
-        "妹妹，永遠不許離開！"
+        "妳怎麼能不陪在我身邊？",
+        "妳不知道我對妳的心有多深嗎？",
+        "妳的拒絕讓我無法接受……",
+        "再錯下去，妳就會失去我！",
+        "妹妹，妳永遠都屬於我！"
       ],
       4: [
-        "怎麼能不屬於我？",
-        "錯誤讓我憤怒！",
-        "你的拒絕只能讓我更愛你！",
-        "再錯一次，你就不屬於我了！",
-        "妹妹，永遠只屬於我！"
+        "妳怎麼能不屬於我？",
+        "這種錯誤讓我怒火中燒！",
+        "妳的拒絕只會讓我更愛妳！",
+        "再錯一次，妳就會失去我！",
+        "妹妹，妳永遠只屬於我！"
       ],
       5: [
-        "怎麼能說不呢？",
-        "錯了，再說不，我就讓你後悔！",
-        "妹妹，你知道我們的約定嗎？",
-        "再錯下去，你就逃不掉了！",
-        "你難道不願意永遠在我身邊？"
+        "妳怎麼能說不？",
+        "錯了，若妳再反駁，我保證讓妳後悔！",
+        "妹妹，妳難道忘了我們的約定？",
+        "再錯下去，妳永遠逃不掉我！",
+        "妳難道不想永遠在我身邊？"
       ]
     };
     
     let index = 0;
     let wrongCount = 0;
     let specialEventActive = false;
-    let specialBarrageInterval; // 用于生成特殊彈幕的 interval
+    let specialBarrageInterval; // 用于生成特殊弹幕的 interval
     
     // 清除所有特殊元素
     function removeSpecialElements() {
@@ -436,9 +436,9 @@
       
       // 使用当前题目的特殊弹幕内容（从 specialMessagesMapping 中取）
       let specialMessages = specialMessagesMapping[index] || [
-        "為什麼選錯了？",
-        "錯誤讓我生氣！",
-        "再錯下去就沒救了！"
+        "為什麼？",
+        "不要讓我生氣！",
+        "哥哥现在很生气。"
       ];
       let spawnedCount = 0;
       specialBarrageInterval = setInterval(() => {
@@ -486,11 +486,8 @@
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>結局</h1>" +
-        "<p>呵呵……妹妹，你終於通過了哥哥的考驗。<br>" +
-        "從今以後，無論你走到哪裡，你都屬於我。<br>" +
-        "哥哥會一直保護你，也會監視你，因為這是我們永遠不變的約定！</p>" +
-        "<p>別忘了，這條路一旦走上，便無法回頭……</p>";
-      // 在结束界面，将结束按钮替换为重新开始按钮
+        "<p>呵呵……妹妹，妳終於通過了我的考驗。從此，無論妳走到哪裡，妳都屬於我。我會一直保護妳，也會緊緊監視妳，這是我們不變的約定。記住，一旦踏上這條路，就再也無法回頭……</p>";
+      // 结束界面，将结束按钮替换为重新開始按钮
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
       restartContainer.appendChild(createRestartButton());
@@ -503,7 +500,7 @@
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>雙向奔赴</h1>" +
-        "<p>呵呵……妹妹，我終於發現了，你那炙熱的愛早已點燃了我的心。當我看到你那堅定的眼神，我明白我們的心早已融合。從此，我們將攜手共赴那無盡的愛河，雙向奔赴，永不分離！</p>";
+        "<p>呵呵……妹妹，妳那炙熱的愛早已點燃了我的心。當我凝視妳堅定的眼神時，我知道，我們的靈魂早已融為一體。從今往後，我們將攜手奔赴那無盡的深愛之海，永不分離……</p>";
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
       restartContainer.appendChild(createRestartButton());
@@ -516,7 +513,7 @@
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>哥哥的金絲雀</h1>" +
-        "<p>妹妹……你竟敢提出離開我？那從今以後，你的自由不再屬於你，永遠都將在我的掌控之中。你，將永遠是我唯一的金絲雀，被我珍藏、被我守護，直到永遠……</p>";
+        "<p>妹妹……妳竟敢想離開我？從今以後，妳的自由將全然歸我掌控。妳將永遠是我唯一的金絲雀，既被我珍藏，又被我牢牢守護，直到永遠……</p>";
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
       restartContainer.appendChild(createRestartButton());
@@ -584,23 +581,23 @@
   <!-- 模态框HTML -->
   <div id="endGameModal1" class="modal">
     <div class="modal-content">
-      <p>是否真的要结束游戏？</p>
+      <p>真的要放弃我们之间的故事吗？</p>
       <button id="modal1No">不是</button>
       <button id="modal1Yes">是</button>
     </div>
   </div>
   <div id="endGameModal2" class="modal">
     <div class="modal-content">
-      <p>妹妹，真的要结束游戏吗？</p>
-      <button id="modal2Sorry">对不起哥哥我按错了</button>
+      <p>妹妹，妳真的要结束这段约定吗？</p>
+      <button id="modal2Sorry">对不起，我按错了</button>
       <button id="modal2End">结束游戏</button>
     </div>
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>妹妹，你就继续玩下去吧，不然……你知道的……</p>
-      <button id="modal3Love">哥哥我爱你</button>
-      <button id="modal3Release">哥哥放我走</button>
+      <p>妹妹，留在我身邊吧，不然…你不会想知道后果的。</p>
+      <button id="modal3Love">哥哥我爱妳</button>
+      <button id="modal3Release">放我走哥哥</button>
     </div>
   </div>
 </body>
