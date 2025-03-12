@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>哥哥的測試</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap');
     body {
       background-color: #ffd6e9;
       color: #a30052;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Homemade Apple', cursive;
       text-align: center;
       padding: 50px;
       position: relative;
@@ -93,7 +94,7 @@
     .floating-text {
       position: absolute;
       font-size: 2em;
-      font-family: 'Courier New', monospace;
+      font-family: 'Homemade Apple', cursive;
       color: #8b0000;
       font-weight: bold;
       text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000;
@@ -123,7 +124,7 @@
     .special-floating-text {
       position: absolute;
       font-size: 2em;
-      font-family: 'Courier New', monospace;
+      font-family: 'Homemade Apple', cursive;
       color: #550000;
       font-weight: bold;
       text-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000;
@@ -208,6 +209,13 @@
   <!-- 屏幕闪烁覆盖层 -->
   <div id="flashOverlay"></div>
   
+  <!-- 心跳音频 -->
+  <audio id="heartbeatAudio" loop>
+    <!-- 请替换为你自己的心跳音频文件 URL -->
+    <source src="heartbeat.mp3" type="audio/mpeg">
+    您的浏览器不支持音频播放。
+  </audio>
+  
   <!-- 模态框：结束游戏流程 -->
   <div id="endGameModal1" class="modal">
     <div class="modal-content">
@@ -225,9 +233,9 @@
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>妹妹，妳就留在我身边吧，不然…妳知道后果。</p>
+      <p>妹妹，留在我身边吧，不然…妳不会想知道后果的。</p>
       <button id="modal3Love">哥哥我爱妳</button>
-      <button id="modal3Release">哥哥放妳走</button>
+      <button id="modal3Release">放我走哥哥</button>
     </div>
   </div>
   
@@ -249,7 +257,7 @@
         q: "如果哥哥不讓你離開，你會怎麼做？",
         options: ["聽哥哥的", "反抗"],
         correct: "聽哥哥的",
-        response: "嗯，這才乖……妹妹只能待在我身邊，哪兒也不能去。",
+        response: "嗯，這才乖……妹妹只能待在哥哥身邊，哪兒也不能去。",
         wrong: [
           "為什麼不聽我的？ 妳就應該服從我。",
           "妳是不是想逃離我？ 真讓我心寒。",
@@ -305,9 +313,9 @@
     // 重新映射特殊弹幕内容，新编号 0~5 分别对应上述题目
     const specialMessagesMapping = {
       0: [
-       "為什麼選『不喜歡』？ 妳知道我有多在乎妳嗎？",
+        "為什麼選『不喜歡』？ 妳知道我有多在乎妳嗎？",
         "妹妹，妳的選擇讓我好失望……",
-        "妳難道不知道，只有我才值得妳的全心全意？",
+        "妳難道不知道，只有我才值得妳全心全意？",
         "錯了，我早就看出妳心中只有我！",
         "再錯下去，妳就會失去我！"
       ],
@@ -334,14 +342,14 @@
       ],
       4: [
         "妳怎麼能不屬於我？",
-        "你怎么可以不爱我",
-        "拒绝了哥哥更加不会放开你",
+        "這種錯誤讓我怒火中燒！",
+        "妳的拒絕只會讓我更愛妳！",
         "再錯一次，妳就會失去我！",
         "妹妹，妳永遠只屬於我！"
       ],
       5: [
         "妳怎麼能說不？",
-        "錯了，若妳再反駁，我保證讓妳後悔！",
+        "錯了，若妳再反驳，我保證讓妳後悔！",
         "妹妹，妳難道忘了我們的約定？",
         "再錯下去，妳永遠逃不掉我！",
         "妳難道不想永遠在我身邊？"
@@ -352,6 +360,11 @@
     let wrongCount = 0;
     let specialEventActive = false;
     let specialBarrageInterval; // 用于生成特殊弹幕的 interval
+    
+    // 获取心跳音频对象
+    const heartbeatAudio = document.getElementById("heartbeatAudio");
+    // 初始设置心跳音量为0
+    heartbeatAudio.volume = 0;
     
     // 清除所有特殊元素
     function removeSpecialElements() {
@@ -368,6 +381,9 @@
       wrongCount = 0;
       specialEventActive = false;
       removeSpecialElements();
+      // 每题开始时重置心跳音量并暂停
+      heartbeatAudio.volume = 0;
+      heartbeatAudio.pause();
       
       let questionText = document.getElementById("question");
       let optionsDiv = document.getElementById("options");
@@ -391,6 +407,10 @@
       let message = document.getElementById("message");
       
       if (answer === correct) {
+        // 正确回答时重置心跳音
+        heartbeatAudio.volume = 0;
+        heartbeatAudio.pause();
+        
         if (specialEventActive) {
           removeSpecialElements();
         }
@@ -403,6 +423,12 @@
         optionsDiv.appendChild(nextButton);
       } else {
         wrongCount++;
+        // 根据错误次数调整心跳音量（最大1.0）
+        heartbeatAudio.volume = Math.min(wrongCount * 0.25, 1);
+        if (heartbeatAudio.paused) {
+          heartbeatAudio.play();
+        }
+        
         if (wrongCount < 4) {
           let wrongResponses = questions[index].wrong;
           let randomIndex = Math.floor(Math.random() * wrongResponses.length);
@@ -438,7 +464,7 @@
       let specialMessages = specialMessagesMapping[index] || [
         "為什麼？",
         "不要讓我生氣！",
-        "哥哥现在很生气。"
+        "我現在很生氣。"
       ];
       let spawnedCount = 0;
       specialBarrageInterval = setInterval(() => {
@@ -483,50 +509,62 @@
       document.body.style.backgroundColor = "#330000";
       document.body.style.color = "#ff9999";
       removeSpecialElements();
+      // 重置心跳音
+      heartbeatAudio.volume = 0;
+      heartbeatAudio.pause();
+      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>結局</h1>" +
         "<p>呵呵……妹妹，妳終於通過了我的考驗。從此，無論妳走到哪裡，妳都屬於我。我會一直保護妳，也會緊緊監視妳，這是我們不變的約定。記住，一旦踏上這條路，就再也無法回頭……</p>";
-      // 结束界面，将结束按钮替换为重新開始按钮
+      // 在结束界面，将结束按钮替换为重新開始按钮
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
-      restartContainer.appendChild(createRestartButton());
+      let restartButton = document.createElement("button");
+      restartButton.id = "restartButton";
+      restartButton.innerText = "重新開始";
+      restartButton.onclick = function() { location.reload(); };
+      restartContainer.appendChild(restartButton);
     }
     
     function showEndingHE() {
       document.body.style.backgroundColor = "#330000";
       document.body.style.color = "#ff9999";
       removeSpecialElements();
+      heartbeatAudio.volume = 0;
+      heartbeatAudio.pause();
+      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>雙向奔赴</h1>" +
         "<p>呵呵……妹妹，妳那炙熱的愛早已點燃了我的心。當我凝視妳堅定的眼神時，我知道，我們的靈魂早已融為一體。從今往後，我們將攜手奔赴那無盡的深愛之海，永不分離……</p>";
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
-      restartContainer.appendChild(createRestartButton());
+      let restartButton = document.createElement("button");
+      restartButton.id = "restartButton";
+      restartButton.innerText = "重新開始";
+      restartButton.onclick = function() { location.reload(); };
+      restartContainer.appendChild(restartButton);
     }
     
     function showEndingBE() {
       document.body.style.backgroundColor = "#330000";
       document.body.style.color = "#ff9999";
       removeSpecialElements();
+      heartbeatAudio.volume = 0;
+      heartbeatAudio.pause();
+      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>哥哥的金絲雀</h1>" +
         "<p>妹妹……妳竟敢想離開我？從今以後，妳的自由將全然歸我掌控。妳將永遠是我唯一的金絲雀，既被我珍藏，又被我牢牢守護，直到永遠……</p>";
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
-      restartContainer.appendChild(createRestartButton());
-    }
-    
-    function createRestartButton() {
       let restartButton = document.createElement("button");
       restartButton.id = "restartButton";
       restartButton.innerText = "重新開始";
-      restartButton.addEventListener("click", function() {
-        location.reload();
-      });
-      return restartButton;
+      restartButton.onclick = function() { location.reload(); };
+      restartContainer.appendChild(restartButton);
     }
     
     loadQuestion();
@@ -595,7 +633,7 @@
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>妹妹，留在我身邊吧，不然…你不会想知道后果的。</p>
+      <p>妹妹，留在我身边吧，不然…妳不会想知道后果的。</p>
       <button id="modal3Love">哥哥我爱妳</button>
       <button id="modal3Release">放我走哥哥</button>
     </div>
