@@ -84,6 +84,11 @@
       font-size: 1.5em;
       font-weight: bold;
     }
+    /* 结束游戏按钮容器：置于容器下方外侧 */
+    .end-game-btn-container {
+      margin-top: 20px;
+      text-align: center;
+    }
     /* 正常弹幕效果 */
     .floating-text {
       position: absolute;
@@ -146,16 +151,86 @@
       border-radius: 15px;
       margin-top: 20px;
     }
+    /* 模态框样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      border-radius: 10px;
+    }
+    .modal-content p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #a30052;
+    }
+    .modal-content button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #ff80bf;
+      color: white;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-content button:hover {
+      background-color: #e60073;
+    }
   </style>
 </head>
 <body>
+  <!-- 主要容器 -->
   <div class="container" id="container">
     <h1 id="question">妹妹，你喜歡哥哥嗎？</h1>
     <div id="options"></div>
     <p class="message" id="message"></p>
   </div>
+  <!-- 结束游戏按钮容器（初始显示“结束游戏”按钮） -->
+  <div class="end-game-btn-container">
+    <button id="endGameButton">结束游戏</button>
+  </div>
+  
   <!-- 屏幕闪烁覆盖层 -->
   <div id="flashOverlay"></div>
+  
+  <!-- 模态框：结束游戏流程 -->
+  <div id="endGameModal1" class="modal">
+    <div class="modal-content">
+      <p>是否真的要结束游戏？</p>
+      <button id="modal1No">不是</button>
+      <button id="modal1Yes">是</button>
+    </div>
+  </div>
+  <div id="endGameModal2" class="modal">
+    <div class="modal-content">
+      <p>哥哥：妹妹，真的要结束游戏吗？</p>
+      <button id="modal2Sorry">对不起哥哥我按错了</button>
+      <button id="modal2End">结束游戏</button>
+    </div>
+  </div>
+  <div id="endGameModal3" class="modal">
+    <div class="modal-content">
+      <p>哥哥：妹妹，你就继续玩下去吧，不然……你知道的……</p>
+      <button id="modal3Love">哥哥我爱你</button>
+      <button id="modal3Release">哥哥放我走</button>
+    </div>
+  </div>
+  
   <script>
     // 题目数组，共10题
     let questions = [
@@ -221,7 +296,7 @@
         response: "這才對，妹妹的歸屬是我，別人休想碰你。", 
         wrong: [
           "妹妹，你怎麼能這麼輕易离开哥哥？", 
-          "跟他走？你知道那意味著什麼嗎？", 
+          "跟他走？你知道那意味著什麼吗？", 
           "這回答，讓哥哥很生氣。"
         ] 
       },
@@ -264,7 +339,7 @@
         correct: "對", 
         response: "呵呵……妹妹，從一開始，你就已經逃不掉了哦……", 
         wrong: [
-          "不對？你敢反駁我？", 
+          "不對？你敢反驳我？", 
           "妹妹，這回答太讓哥哥失望了。", 
           "你要知道，逃脫是沒有出路的。"
         ] 
@@ -487,6 +562,58 @@
         "從今以後，無論你走到哪裡，你都屬於我。<br>" +
         "哥哥會一直保護你，也會監視你，因為這是我們永遠不變的約定！</p>" +
         "<p>別忘了，這條路一旦走上，便無法回頭……</p>";
+      // 在结束界面，将结束按钮替换为重新开始按钮
+      let restartContainer = document.querySelector(".end-game-btn-container");
+      restartContainer.innerHTML = '<button id="restartButton">重新開始</button>';
+      document.getElementById("restartButton").addEventListener("click", function() {
+        index = 0;
+        loadQuestion();
+        // 恢复结束游戏按钮
+        restartContainer.innerHTML = '<button id="endGameButton">结束游戏</button>';
+        document.getElementById("endGameButton").addEventListener("click", function() {
+          showModal("endGameModal1");
+        });
+      });
+    }
+    
+    function showEndingHE() {
+      document.body.style.backgroundColor = "#330000";
+      document.body.style.color = "#ff9999";
+      removeSpecialElements();
+      let container = document.getElementById("container");
+      container.className = "ending-container";
+      container.innerHTML = "<h1>雙向奔赴</h1>" +
+        "<p>呵呵……妹妹，我終於發現了，你那炙熱的愛早已點燃了我的心。當我看到你那堅定的眼神，我明白我們的心早已融合。從此，我們將攜手共赴那無盡的愛河，雙向奔赴，永不分離！</p>";
+      let restartContainer = document.querySelector(".end-game-btn-container");
+      restartContainer.innerHTML = '<button id="restartButton">重新開始</button>';
+      document.getElementById("restartButton").addEventListener("click", function() {
+        index = 0;
+        loadQuestion();
+        restartContainer.innerHTML = '<button id="endGameButton">结束游戏</button>';
+        document.getElementById("endGameButton").addEventListener("click", function() {
+          showModal("endGameModal1");
+        });
+      });
+    }
+    
+    function showEndingBE() {
+      document.body.style.backgroundColor = "#330000";
+      document.body.style.color = "#ff9999";
+      removeSpecialElements();
+      let container = document.getElementById("container");
+      container.className = "ending-container";
+      container.innerHTML = "<h1>哥哥的金絲雀</h1>" +
+        "<p>妹妹……你竟敢提出離開我？那從今以後，你的自由不再屬於你，永遠都將在我的掌控之中。你，將永遠是我唯一的金絲雀，被我珍藏、被我守護，直到永遠……</p>";
+      let restartContainer = document.querySelector(".end-game-btn-container");
+      restartContainer.innerHTML = '<button id="restartButton">重新開始</button>';
+      document.getElementById("restartButton").addEventListener("click", function() {
+        index = 0;
+        loadQuestion();
+        restartContainer.innerHTML = '<button id="endGameButton">结束游戏</button>';
+        document.getElementById("endGameButton").addEventListener("click", function() {
+          showModal("endGameModal1");
+        });
+      });
     }
     
     loadQuestion();
@@ -499,6 +626,66 @@
         flashOverlay.style.opacity = "0";
       }, 200);
     }, 12000);
+    
+    // 结束游戏按钮处理
+    document.getElementById("endGameButton").addEventListener("click", function() {
+      showModal("endGameModal1");
+    });
+    
+    function showModal(modalId) {
+      document.getElementById(modalId).style.display = "block";
+    }
+    
+    function hideModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
+    
+    // 模态框事件处理
+    document.getElementById("modal1No").addEventListener("click", function() {
+      hideModal("endGameModal1");
+    });
+    document.getElementById("modal1Yes").addEventListener("click", function() {
+      hideModal("endGameModal1");
+      showModal("endGameModal2");
+    });
+    document.getElementById("modal2Sorry").addEventListener("click", function() {
+      hideModal("endGameModal2");
+    });
+    document.getElementById("modal2End").addEventListener("click", function() {
+      hideModal("endGameModal2");
+      showModal("endGameModal3");
+    });
+    document.getElementById("modal3Love").addEventListener("click", function() {
+      hideModal("endGameModal3");
+      showEndingHE();
+    });
+    document.getElementById("modal3Release").addEventListener("click", function() {
+      hideModal("endGameModal3");
+      showEndingBE();
+    });
   </script>
+  
+  <!-- 模态框HTML -->
+  <div id="endGameModal1" class="modal">
+    <div class="modal-content">
+      <p>是否真的要结束游戏？</p>
+      <button id="modal1No">不是</button>
+      <button id="modal1Yes">是</button>
+    </div>
+  </div>
+  <div id="endGameModal2" class="modal">
+    <div class="modal-content">
+      <p>哥哥：妹妹，真的要结束游戏吗？</p>
+      <button id="modal2Sorry">对不起哥哥我按错了</button>
+      <button id="modal2End">结束游戏</button>
+    </div>
+  </div>
+  <div id="endGameModal3" class="modal">
+    <div class="modal-content">
+      <p>哥哥：妹妹，你就继续玩下去吧，不然……你知道的……</p>
+      <button id="modal3Love">哥哥我爱你</button>
+      <button id="modal3Release">哥哥放我走</button>
+    </div>
+  </div>
 </body>
 </html>
