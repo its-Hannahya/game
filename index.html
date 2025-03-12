@@ -200,7 +200,7 @@
     <div id="options"></div>
     <p class="message" id="message"></p>
   </div>
-  <!-- 结束游戏按钮容器，位于容器下方外侧 -->
+  <!-- 结束游戏按钮容器（置于容器下方外侧） -->
   <div class="end-game-btn-container">
     <button id="endGameButton">结束游戏</button>
   </div>
@@ -218,21 +218,21 @@
   </div>
   <div id="endGameModal2" class="modal">
     <div class="modal-content">
-      <p>哥哥：妹妹，真的要结束游戏吗？</p>
+      <p>妹妹，真的要结束游戏吗？</p>
       <button id="modal2Sorry">对不起哥哥我按错了</button>
       <button id="modal2End">结束游戏</button>
     </div>
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>哥哥：妹妹，你就继续玩下去吧，不然……你知道的……</p>
+      <p>妹妹，你就继续玩下去吧，不然……你知道的……</p>
       <button id="modal3Love">哥哥我爱你</button>
       <button id="modal3Release">哥哥放我走</button>
     </div>
   </div>
   
   <script>
-    // 新的题目数组：仅保留原数组中索引 0,1,2,4,8,9
+    // 题目数组，共6题（删除了第4、6、7、8题）
     let questions = [
       {
         q: "妹妹，你喜歡哥哥嗎？",
@@ -302,8 +302,7 @@
       }
     ];
     
-    // 重新映射特殊弹幕内容，新编号 0～5 分别对应原映射：
-    // 新0：原0, 新1：原1, 新2：原2, 新3：原4, 新4：原8, 新5：原9
+    // 重新映射特殊弹幕内容，新编号 0~5 分别对应原映射的 0,1,2,4,8,9
     const specialMessagesMapping = {
       0: [
         "為什麼你要選『不喜歡』？",
@@ -352,7 +351,7 @@
     let index = 0;
     let wrongCount = 0;
     let specialEventActive = false;
-    let specialBarrageInterval; // 用于生成特殊弹幕的 interval
+    let specialBarrageInterval; // 用于生成特殊彈幕的 interval
     
     // 清除所有特殊元素
     function removeSpecialElements() {
@@ -437,9 +436,9 @@
       
       // 使用当前题目的特殊弹幕内容（从 specialMessagesMapping 中取）
       let specialMessages = specialMessagesMapping[index] || [
-        "哥哥：為什麼選錯了？",
-        "哥哥：錯誤讓我生氣！",
-        "哥哥：再錯下去就沒救了！"
+        "為什麼選錯了？",
+        "錯誤讓我生氣！",
+        "再錯下去就沒救了！"
       ];
       let spawnedCount = 0;
       specialBarrageInterval = setInterval(() => {
@@ -528,7 +527,6 @@
       restartButton.id = "restartButton";
       restartButton.innerText = "重新開始";
       restartButton.addEventListener("click", function() {
-        // 直接重载页面，确保从头开始
         location.reload();
       });
       return restartButton;
@@ -593,14 +591,14 @@
   </div>
   <div id="endGameModal2" class="modal">
     <div class="modal-content">
-      <p>哥哥：妹妹，真的要结束游戏吗？</p>
+      <p>妹妹，真的要结束游戏吗？</p>
       <button id="modal2Sorry">对不起哥哥我按错了</button>
       <button id="modal2End">结束游戏</button>
     </div>
   </div>
   <div id="endGameModal3" class="modal">
     <div class="modal-content">
-      <p>哥哥：妹妹，你就继续玩下去吧，不然……你知道的……</p>
+      <p>妹妹，你就继续玩下去吧，不然……你知道的……</p>
       <button id="modal3Love">哥哥我爱你</button>
       <button id="modal3Release">哥哥放我走</button>
     </div>
