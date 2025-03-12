@@ -76,6 +76,7 @@
       border-radius: 10px;
       cursor: pointer;
       margin: 10px;
+      transition: background-color 0.3s;
     }
     button:hover {
       background-color: #e60073;
@@ -144,7 +145,7 @@
       z-index: 25;
       cursor: pointer;
     }
-    /* 結局畫面樣式 */
+    /* 結局畫面样式 – 字体放大 */
     .ending-container {
       background: #330000;
       color: #ff9999;
@@ -152,7 +153,23 @@
       border-radius: 15px;
       margin-top: 20px;
     }
-    /* 模态框样式 */
+    .ending-container h1 {
+      font-size: 3em;
+    }
+    .ending-container p {
+      font-size: 1.8em;
+    }
+    /* 模态框样式 – 弹窗内字体放大 */
+    .modal-content p {
+      font-size: 1.6em;
+    }
+    .modal-content button {
+      font-size: 1.2em;
+    }
+    .modal-content {
+      font-family: 'Homemade Apple', cursive;
+    }
+    /* 模态框 */
     .modal {
       display: none;
       position: fixed;
@@ -173,24 +190,6 @@
       max-width: 400px;
       text-align: center;
       border-radius: 10px;
-    }
-    .modal-content p {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-      color: #a30052;
-    }
-    .modal-content button {
-      margin: 10px;
-      padding: 10px 20px;
-      border: none;
-      background-color: #ff80bf;
-      color: white;
-      font-size: 1em;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .modal-content button:hover {
-      background-color: #e60073;
     }
   </style>
 </head>
@@ -310,6 +309,9 @@
       }
     ];
     
+    // 用于记录每题是否点击过错误答案
+    let questionWrongFlags = new Array(questions.length).fill(false);
+    
     // 重新映射特殊弹幕内容，新编号 0~5 分别对应上述题目
     const specialMessagesMapping = {
       0: [
@@ -349,7 +351,7 @@
       ],
       5: [
         "妳怎麼能說不？",
-        "錯了，若妳再反驳，我保證讓妳後悔！",
+        "錯了，若妳再反駁，我保證讓妳後悔！",
         "妹妹，妳難道忘了我們的約定？",
         "再錯下去，妳永遠逃不掉我！",
         "妳難道不想永遠在我身邊？"
@@ -359,14 +361,11 @@
     let index = 0;
     let wrongCount = 0;
     let specialEventActive = false;
-    let specialBarrageInterval; // 用于生成特殊弹幕的 interval
+    let specialBarrageInterval;
     
-    // 获取心跳音频对象
     const heartbeatAudio = document.getElementById("heartbeatAudio");
-    // 初始设置心跳音量为0
     heartbeatAudio.volume = 0;
     
-    // 清除所有特殊元素
     function removeSpecialElements() {
       document.querySelectorAll(".special-button").forEach(el => el.remove());
       document.querySelectorAll(".special-floating-text").forEach(el => el.remove());
@@ -381,9 +380,9 @@
       wrongCount = 0;
       specialEventActive = false;
       removeSpecialElements();
-      // 每题开始时重置心跳音量并暂停
       heartbeatAudio.volume = 0;
       heartbeatAudio.pause();
+      questionWrongFlags[index] = false;
       
       let questionText = document.getElementById("question");
       let optionsDiv = document.getElementById("options");
@@ -396,24 +395,20 @@
       questions[index].options.forEach(option => {
         let button = document.createElement("button");
         button.innerText = option;
-        button.onclick = () => checkAnswer(option);
+        button.onclick = function() { checkAnswer(option, this); };
         optionsDiv.appendChild(button);
       });
     }
     
-    function checkAnswer(answer) {
+    function checkAnswer(answer, btn) {
       if (index >= questions.length) return;
       let correct = questions[index].correct;
       let message = document.getElementById("message");
       
       if (answer === correct) {
-        // 正确回答时重置心跳音
         heartbeatAudio.volume = 0;
         heartbeatAudio.pause();
-        
-        if (specialEventActive) {
-          removeSpecialElements();
-        }
+        if (specialEventActive) removeSpecialElements();
         message.innerText = questions[index].response;
         let optionsDiv = document.getElementById("options");
         optionsDiv.innerHTML = "";
@@ -423,12 +418,15 @@
         optionsDiv.appendChild(nextButton);
       } else {
         wrongCount++;
-        // 根据错误次数调整心跳音量（最大1.0）
-        heartbeatAudio.volume = Math.min(wrongCount * 0.25, 1);
-        if (heartbeatAudio.paused) {
-          heartbeatAudio.play();
+        questionWrongFlags[index] = true;
+        heartbeatAudio.volume = Math.min(heartbeatAudio.volume + 0.04, 1);
+        if (heartbeatAudio.paused) heartbeatAudio.play();
+        // 若为第6题且所有题目都曾点击过错误，则触发隐藏结局 BE2
+        if (index === questions.length - 1 && questionWrongFlags.every(flag => flag)) {
+          showHiddenEndingBE2();
+          return;
         }
-        
+        btn.style.backgroundColor = interpolateColor("#ff80bf", "#8B0000", wrongCount / 4);
         if (wrongCount < 4) {
           let wrongResponses = questions[index].wrong;
           let randomIndex = Math.floor(Math.random() * wrongResponses.length);
@@ -441,26 +439,34 @@
       }
     }
     
+    function interpolateColor(color1, color2, factor) {
+      if (color1[0] === '#') color1 = color1.slice(1);
+      if (color2[0] === '#') color2 = color2.slice(1);
+      let r1 = parseInt(color1.substring(0,2), 16),
+          g1 = parseInt(color1.substring(2,4), 16),
+          b1 = parseInt(color1.substring(4,6), 16);
+      let r2 = parseInt(color2.substring(0,2), 16),
+          g2 = parseInt(color2.substring(2,4), 16),
+          b2 = parseInt(color2.substring(4,6), 16);
+      let r = Math.round(r1 + factor * (r2 - r1)),
+          g = Math.round(g1 + factor * (g2 - g1)),
+          b = Math.round(b1 + factor * (b2 - b1));
+      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    
     function triggerSpecialEvent() {
       specialEventActive = true;
       let optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
-      
-      // 生成 20 个特殊正确答案按钮，散布在屏幕上
       for (let i = 0; i < 20; i++) {
         let btn = document.createElement("button");
         btn.innerText = questions[index].correct;
         btn.classList.add("special-button");
         btn.style.left = Math.random() * 90 + "vw";
         btn.style.top = Math.random() * 90 + "vh";
-        btn.onclick = () => {
-          removeSpecialElements();
-          nextQuestion();
-        };
+        btn.onclick = () => { removeSpecialElements(); nextQuestion(); };
         document.body.appendChild(btn);
       }
-      
-      // 使用当前题目的特殊弹幕内容（从 specialMessagesMapping 中取）
       let specialMessages = specialMessagesMapping[index] || [
         "為什麼？",
         "不要讓我生氣！",
@@ -476,9 +482,7 @@
         spawnedCount++;
         let div = document.createElement("div");
         div.classList.add("special-floating-text");
-        // 固定起始位置：屏幕左边
         div.style.left = "0vw";
-        // 随机垂直位置
         div.style.top = Math.random() * 100 + "vh";
         let msg = specialMessages[Math.floor(Math.random() * specialMessages.length)];
         div.innerText = msg;
@@ -509,15 +513,12 @@
       document.body.style.backgroundColor = "#330000";
       document.body.style.color = "#ff9999";
       removeSpecialElements();
-      // 重置心跳音
       heartbeatAudio.volume = 0;
       heartbeatAudio.pause();
-      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>結局</h1>" +
         "<p>呵呵……妹妹，妳終於通過了我的考驗。從此，無論妳走到哪裡，妳都屬於我。我會一直保護妳，也會緊緊監視妳，這是我們不變的約定。記住，一旦踏上這條路，就再也無法回頭……</p>";
-      // 在结束界面，将结束按钮替换为重新開始按钮
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
       let restartButton = document.createElement("button");
@@ -533,7 +534,6 @@
       removeSpecialElements();
       heartbeatAudio.volume = 0;
       heartbeatAudio.pause();
-      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>雙向奔赴</h1>" +
@@ -553,11 +553,10 @@
       removeSpecialElements();
       heartbeatAudio.volume = 0;
       heartbeatAudio.pause();
-      
       let container = document.getElementById("container");
       container.className = "ending-container";
       container.innerHTML = "<h1>哥哥的金絲雀</h1>" +
-        "<p>妹妹……妳竟敢想離開我？從今以後，妳的自由將全然歸我掌控。妳將永遠是我唯一的金絲雀，既被我珍藏，又被我牢牢守護，直到永遠……</p>";
+        "<p>呵呵……妹妹，妳竟敢想離開我？從今以後，妳的自由將全然歸我掌控。妳將永遠是我唯一的金絲雀，既被我珍藏，又被我牢牢守護，直到永遠……</p>";
       let restartContainer = document.querySelector(".end-game-btn-container");
       restartContainer.innerHTML = "";
       let restartButton = document.createElement("button");
@@ -565,6 +564,79 @@
       restartButton.innerText = "重新開始";
       restartButton.onclick = function() { location.reload(); };
       restartContainer.appendChild(restartButton);
+    }
+    
+    // 新增隐藏结局 BE2：如果所有6题均曾点击错误答案，则在第6题再次点击错误时触发
+    function showHiddenEndingBE2() {
+      // 清空页面，确保全黑无任何元素
+      document.body.innerHTML = "";
+      document.body.style.backgroundColor = "#000";
+      document.body.style.color = "#0000FF";
+      removeSpecialElements();
+      heartbeatAudio.volume = 0;
+      heartbeatAudio.pause();
+      
+      // 创建覆盖全屏的图片元素，进行闪烁效果
+      let flashImg = document.createElement("img");
+      flashImg.src = "https://as2.ftcdn.net/v2/jpg/01/38/06/91/1000_F_138069152_qLMqnGyO8FIFlYySSz7btd9foo5aZrSG.jpg";
+      flashImg.style.position = "fixed";
+      flashImg.style.top = "0";
+      flashImg.style.left = "0";
+      flashImg.style.width = "100%";
+      flashImg.style.height = "100%";
+      flashImg.style.objectFit = "cover";
+      flashImg.style.zIndex = "10000";
+      flashImg.style.opacity = "0";
+      document.body.appendChild(flashImg);
+      
+      // 每2秒闪烁一次，每次持续0.15秒，共闪3次
+      let flashCount = 0;
+      let flashInterval = setInterval(() => {
+        flashImg.style.opacity = "1";
+        setTimeout(() => {
+          flashImg.style.opacity = "0";
+        }, 150);
+        flashCount++;
+        if (flashCount >= 3) {
+          clearInterval(flashInterval);
+          setTimeout(showHiddenEndingText, 500);
+          setTimeout(() => { flashImg.remove(); }, 1000);
+        }
+      }, 2000);
+    }
+    
+    function showHiddenEndingText() {
+      // 显示隐藏结局文本（全屏黑底，蓝色旧铅字风格大字体），页面内无其它元素
+      document.body.innerHTML = "";
+      document.body.style.backgroundColor = "#000";
+      let textDiv = document.createElement("div");
+      textDiv.style.position = "fixed";
+      textDiv.style.top = "50%";
+      textDiv.style.left = "50%";
+      textDiv.style.transform = "translate(-50%, -50%)";
+      textDiv.style.width = "90%";
+      textDiv.style.color = "#0000FF";
+      textDiv.style.fontFamily = "'Courier New', monospace";
+      textDiv.style.fontSize = "4em";
+      textDiv.style.textAlign = "center";
+      textDiv.innerHTML = "呵……小乖，你是不是有點太不把我放在眼裡了？嗯？最近是不是忘了哥哥的存在，還是說……有誰比我更重要了？ 可真讓人氣得發瘋啊……你知道的，我可沒什麼耐心，也沒什麼安全感，最討厭你對我愛答不理的樣子了。是不是要我把你關起來，讓你只能看著我，才能記住自己是誰的？";
+      document.body.appendChild(textDiv);
+      
+      // 在页面右下角添加一个蓝底黑字的“重新開始”按钮
+      let restartButton = document.createElement("button");
+      restartButton.innerText = "重新開始";
+      restartButton.style.position = "fixed";
+      restartButton.style.right = "20px";
+      restartButton.style.bottom = "20px";
+      restartButton.style.backgroundColor = "#0000FF";
+      restartButton.style.color = "#000";
+      restartButton.style.fontSize = "1.5em";
+      restartButton.style.border = "none";
+      restartButton.style.padding = "10px 20px";
+      restartButton.style.borderRadius = "5px";
+      restartButton.style.cursor = "pointer";
+      restartButton.onclick = function() { location.reload(); };
+      document.body.appendChild(restartButton);
     }
     
     loadQuestion();
